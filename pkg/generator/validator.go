@@ -35,7 +35,7 @@ type requiredValidator struct {
 }
 
 func (v *requiredValidator) generate(out *codegen.Emitter) {
-	out.Printlnf(`if v, ok := %s["%s"]; !ok || v == nil {`, varNameRawMap, v.jsonName)
+	out.Printlnf(`if v, ok := %s["%s"]; !ok {`, varNameRawMap, v.jsonName)
 	out.Indent(1)
 	out.Printlnf(`return fmt.Errorf("field %s in %s: required")`, v.jsonName, v.declName)
 	out.Indent(-1)
