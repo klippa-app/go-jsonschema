@@ -610,6 +610,42 @@ func (g *schemaGenerator) generateTypeInline(
 		}
 
 		if len(t.Type) == 0 {
+			// This is a very simple implementation of nullable refs.
+			if len(t.OneOf) == 2 {
+				var ref string
+				// Support null as first, ref as second.
+				if len(t.OneOf[0].Type) == 1 && t.OneOf[0].Type[0] == "null" && t.OneOf[1].Ref != "" {
+					ref = t.OneOf[1].Ref
+				}
+
+				// Support ref as first, null as second.
+				if len(t.OneOf[1].Type) == 1 && t.OneOf[1].Type[0] == "null" && t.OneOf[0].Ref != "" {
+					ref = t.OneOf[0].Ref
+				}
+
+				if ref != "" {
+					t.Ref = ref
+					declaredType, err := g.generateDeclaredType(t, scope)
+					if err != nil {
+						return nil, err
+					}
+					return codegen.WrapTypeInPointer(declaredType), nil
+				}
+			}
+
+			// This is a very simple implementation of non-nullable refs.
+			if len(t.AllOf) == 1 {
+				var ref string
+				if t.AllOf[0].Ref != "" {
+					ref = t.AllOf[0].Ref
+				}
+
+				if ref != "" {
+					t.Ref = ref
+					return g.generateDeclaredType(t, scope)
+				}
+			}
+
 			return codegen.EmptyInterfaceType{}, nil
 		}
 
