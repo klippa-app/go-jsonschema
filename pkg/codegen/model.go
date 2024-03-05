@@ -100,7 +100,7 @@ func (p *Package) Generate(out *Emitter) {
 	sort.Slice(sorted, func(i, j int) bool {
 		if a, ok := sorted[i].(Named); ok {
 			if b, ok := sorted[j].(Named); ok {
-				return a.GetName() < b.GetName()
+				return schemas.CleanNameForSorting(a.GetName()) < schemas.CleanNameForSorting(b.GetName())
 			}
 		}
 
@@ -168,6 +168,11 @@ func (f Fragment) Generate(out *Emitter) {
 // Method defines a method and how to generate it.
 type Method struct {
 	Impl func(*Emitter)
+	Name string
+}
+
+func (m *Method) GetName() string {
+	return m.Name
 }
 
 func (m *Method) Generate(out *Emitter) {
